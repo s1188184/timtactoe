@@ -16,7 +16,7 @@ export default class TicTacToe extends React.Component {
   }
 
   render() {
-    const { row, col } = this.props;
+    const { row, col, winner } = this.props;
     return (
       <div className="space" onClick={this.handleClick}>
         <div className="value">
