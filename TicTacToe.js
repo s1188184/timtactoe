@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 
 import Space from './Space';
 
+import 'bootstrap/dist/css/bootstrap.css';
 import './tictactoe.css';
 
 export default class TicTacToe extends React.Component {
@@ -10,9 +11,7 @@ export default class TicTacToe extends React.Component {
   constructor() {
     super();
     this.state = {
-      board: [
-        [], [], []
-      ],
+      board: ['', '', '', '', '', '', '', '', ''],
       turn: 'x',
     }
     this.handleClick = this.handleClick.bind(this);
@@ -20,141 +19,133 @@ export default class TicTacToe extends React.Component {
   }
 
 
-  handleClick(row, col) {
+  handleClick(space) {
 
-
-    if (!this.state.winner && !this.state.board[row][col]) {
+    if (!this.state.winner && !this.state.board[space]) {
 
       let newBoard = this.state.board.slice();
-      newBoard[row][col] = this.state.turn;
+      newBoard[space] = this.state.turn;
       const nextTurn = this.state.turn === 'x' ? 'o' : 'x';
+
+      const winner = this.checkForWin(newBoard);
+
       this.setState({
         turn: nextTurn,
-        board: newBoard
+        board: newBoard,
+        winner
       });
 
-      const winner = this.checkForWin();
-      if (winner) {
-        this.setState({ winner });
-      }
 
     }
   }
 
   handleReset() {
     this.setState({
-      board: [[], [], []],
+      board: [],
       turn: 'x',
       winner: undefined
     });
 
   }
 
-  checkForWin() {
+  checkForWin(board) {
 
-    debugger;
+    // winning combos
+    const winningCombos = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
 
-    let { board } = this.state;
+    for (let combo of winningCombos) {
 
-    // check rows
-    for (let r = 0; r < 3; r++) {
-      if (board[r][0] && board[r][1] && board[r][2] &&
-        board[r][0] === board[r][1] &&
-        board[r][1] === board[r][2]) {
+      if (board[combo[0]] === 'x' &&
+        board[combo[1]] === 'x' &&
+        board[combo[2]] === 'x') {
         return {
-          winner: board[r][0],
-          spaces: [[r, 0], [r, 1], [r, 2]]
+          player: 'x',
+          combo
         };
       }
-    }
 
-    // check columns
-    for (let c = 0; c < 3; c++) {
-      if (board[0][c] && board[1][c] && board[2][c] &&
-        board[0][c] === board[1][c] &&
-        board[1][c] === board[2][c]) {
+      if (board[combo[0]] === 'o' &&
+        board[combo[1]] === 'o' &&
+        board[combo[2]] === 'o') {
         return {
-          winner: board[0][c],
-          spaces: [[0, c], [1, c], [2, c]]
+          player: 'o',
+          combo
         };
       }
-    }
-
-    // check backslash
-    if (board[0][0] && board[1][1] && board[2][2] &&
-      board[0][0] === board[1][1] &&
-      board[1][1] === board[2][2]) {
-      return {
-        winner: board[1][1],
-        spaces: [[0, 0], [1, 1], [2, 2]]
-      };
-    }
-
-    //check slash
-    if (board[0][2] && board[1][1] && board[2][0] &&
-      board[0][2] === board[1][1] &&
-      board[1][1] === board[2][0]) {
-      return {
-        winner: board[1][1],
-        spaces: [[0, 2], [1, 1], [2, 0]]
-      };
     }
 
     return undefined;
-
   }
 
   render() {
+
+    const { winner } = this.state;
+
+    let winningCombo = [];
+    if (winner) {
+      winningCombo = winner.combo;
+    }
+
+
+
     return (
       <div>
         <div className="board">
-          <div className="row">
-            <div className="col">
-              <Space row={0} col={0} winner={this.state.winner} value={this.state.board[0][0]} onClick={this.handleClick} />
+          <div className="roe">
+            <div className="column">
+              <Space id="0" winner={winningCombo.includes(0)} value={this.state.board[0]} onClick={this.handleClick} />
             </div>
-            <div className="col">
-              <Space row={0} col={1} value={this.state.board[0][1]} onClick={this.handleClick} />
+            <div className="column">
+              <Space id="1" winner={winningCombo.includes(1)} value={this.state.board[1]} onClick={this.handleClick} />
             </div>
-            <div className="col">
-              <Space row={0} col={2} value={this.state.board[0][2]} onClick={this.handleClick} />
-            </div>
-          </div>
-          <div className="row">
-            <div className="col">
-              <Space row={1} col={0} value={this.state.board[1][0]} onClick={this.handleClick} />
-            </div>
-            <div className="col">
-              <Space row={1} col={1} value={this.state.board[1][1]} onClick={this.handleClick} />
-            </div>
-            <div className="col">
-              <Space row={1} col={2} value={this.state.board[1][2]} onClick={this.handleClick} />
+            <div className="column">
+              <Space id="2" winner={winningCombo.includes(2)} value={this.state.board[2]} onClick={this.handleClick} />
             </div>
           </div>
-          <div className="row">
-            <div className="col">
-              <Space row={2} col={0} value={this.state.board[2][0]} onClick={this.handleClick} />
+          <div className="roe">
+            <div className="column">
+              <Space id="3" winner={winningCombo.includes(3)} value={this.state.board[3]} onClick={this.handleClick} />
             </div>
-            <div className="col">
-              <Space row={2} col={1} value={this.state.board[2][1]} onClick={this.handleClick} />
+            <div className="column">
+              <Space id="4" winner={winningCombo.includes(4)} value={this.state.board[4]} onClick={this.handleClick} />
             </div>
-            <div className="col">
-              <Space row={2} col={2} value={this.state.board[2][2]} onClick={this.handleClick} />
+            <div className="column">
+              <Space id="5" winner={winningCombo.includes(5)} value={this.state.board[5]} onClick={this.handleClick} />
+            </div>
+          </div>
+          <div className="roe">
+            <div className="column">
+              <Space id="6" winner={winningCombo.includes(6)} value={this.state.board[6]} onClick={this.handleClick} />
+            </div>
+            <div className="column">
+              <Space id="7" winner={winningCombo.includes(7)} value={this.state.board[7]} onClick={this.handleClick} />
+            </div>
+            <div className="column">
+              <Space id="8" winner={winningCombo.includes(8)} value={this.state.board[8]} onClick={this.handleClick} />
             </div>
           </div>
         </div>
-        <button onClick={this.handleReset}>Reset</button>
+        <br/>
+        <button className="btn btn-secondary btn-lg btn-block" onClick={this.handleReset}>Reset</button>
 
 
-        <div className="info">
-          Turn: {this.state.turn}
-        </div>
 
 
-        {this.state.winner &&
-          <div className="results">
-            Winner: {this.state.winner.winner}
+        {/*!this.state.winner &&
+          <div className="info">
+            Turn: {this.state.turn}
           </div>
-        }
+        */}
+
       </div>
     );
   }
