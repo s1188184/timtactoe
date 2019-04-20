@@ -10,8 +10,25 @@ export default class TicTacToe extends React.Component {
   constructor() {
     super();
     this.state = {
+      xPieces: [
+        { id: 'x11', player: 'x', size: 1 },
+        { id: 'x12', player: 'x', size: 1 },
+        { id: 'x21', player: 'x', size: 2 },
+        { id: 'x22', player: 'x', size: 2 },
+        { id: 'x31', player: 'x', size: 3 },
+        { id: 'x32', player: 'x', size: 3 },
+      ],
+      oPieces: [
+        { player: 'o', size: 1 },
+        { player: 'o', size: 1 },
+        { player: 'o', size: 2 },
+        { player: 'o', size: 2 },
+        { player: 'o', size: 3 },
+        { player: 'o', size: 3 },
+      ],
       board: [[], [], [], [], [], [], [], [], []],
       turn: 'x',
+      selected: null,
     }
     this.handleClick = this.handleClick.bind(this);
     this.handleReset = this.handleReset.bind(this);
@@ -36,6 +53,10 @@ export default class TicTacToe extends React.Component {
 
 
     }
+  }
+
+  handleSelectPiece(id) {
+    
   }
 
   handleReset() {
@@ -64,7 +85,7 @@ export default class TicTacToe extends React.Component {
 
     // get current board
     const currentBoard = board.map(space => {
-      return space[space.length-1];
+      return space[space.length - 1];
     });
 
 
@@ -94,7 +115,7 @@ export default class TicTacToe extends React.Component {
 
   render() {
 
-    const { winner } = this.state;
+    const { xPieces, winner } = this.state;
 
     let winningCombo = [];
     if (winner) {
@@ -102,9 +123,22 @@ export default class TicTacToe extends React.Component {
     }
 
 
+    const xPiecesComponents = xPieces.map(piece => {
+      return (<a key={piece.id} href="#" onClick={()=>this.handleSelectPiece(piece.id)}>{piece.id}</a>);
+    });
+
+    debugger;
+
 
     return (
       <div>
+
+        X Pieces:
+        <div className="pieces">
+          {xPiecesComponents}
+        </div>
+
+
         <div className="board">
           <div className="roe">
             <div className="column">
@@ -146,11 +180,12 @@ export default class TicTacToe extends React.Component {
 
 
 
-        {/*!this.state.winner &&
+        {!this.state.winner &&
           <div className="info">
-            Turn: {this.state.turn}
+            <br />
+            Up next: {this.state.turn}
           </div>
-        */}
+        }
 
       </div>
     );
