@@ -1,6 +1,7 @@
 import React from "react";
 
 import Space from './Space';
+import Piece from './Piece';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './tictactoe.css';
@@ -11,58 +12,149 @@ export default class TicTacToe extends React.Component {
     super();
     this.state = {
       xPieces: [
-        { id: 'x11', player: 'x', size: 1 },
-        { id: 'x12', player: 'x', size: 1 },
-        { id: 'x21', player: 'x', size: 2 },
-        { id: 'x22', player: 'x', size: 2 },
-        { id: 'x31', player: 'x', size: 3 },
-        { id: 'x32', player: 'x', size: 3 },
+        { id: 'x1.1', player: 'x', size: 1 },
+        { id: 'x1.2', player: 'x', size: 1 },
+        { id: 'x2.1', player: 'x', size: 2 },
+        { id: 'x2.2', player: 'x', size: 2 },
+        { id: 'x3.1', player: 'x', size: 3 },
+        { id: 'x3.2', player: 'x', size: 3 },
       ],
       oPieces: [
-        { player: 'o', size: 1 },
-        { player: 'o', size: 1 },
-        { player: 'o', size: 2 },
-        { player: 'o', size: 2 },
-        { player: 'o', size: 3 },
-        { player: 'o', size: 3 },
+        { id: 'o1.1', player: 'o', size: 1 },
+        { id: 'o1.2', player: 'o', size: 1 },
+        { id: 'o2.1', player: 'o', size: 2 },
+        { id: 'o2.2', player: 'o', size: 2 },
+        { id: 'o3.1', player: 'o', size: 3 },
+        { id: 'o3.2', player: 'o', size: 3 },
       ],
       board: [[], [], [], [], [], [], [], [], []],
       turn: 'x',
       selected: null,
     }
-    this.handleClick = this.handleClick.bind(this);
+    this.handleSpaceClick = this.handleSpaceClick.bind(this);
+    this.handlePieceClick = this.handlePieceClick.bind(this);
     this.handleReset = this.handleReset.bind(this);
   }
 
 
-  handleClick(space) {
+  handleSpaceClick(space) {
+    console.log('space click: ' + space);
+    debugger;
 
-    if (!this.state.winner && this.state.board[space].length < 3) {
+    if (this.state.selected) {
 
+
+
+      if (!this.state.winner && this.state.board[space].length < 3) {
+
+
+        const topPiece = this.state.board[space][this.state.board[space].length - 1];
+        if (!topPiece || topPiece.size < this.state.selected.size) {
+
+          if (this.state.selected.space !== space) {
+
+            let newBoard = this.state.board.slice();
+            let selectedPiece = Object.assign({}, this.state.selected);
+            selectedPiece.space = space;
+            newBoard[space].push(selectedPiece);
+            const nextTurn = this.state.turn === 'x' ? 'o' : 'x';
+
+            const winner = this.checkForWin(newBoard);
+
+            this.setState({
+              turn: nextTurn,
+              board: newBoard,
+              selected: null,
+              winner
+            });
+
+          }
+
+        }
+
+
+      }
+    }
+  }
+
+  handlePieceClick(piece) {
+    console.log('piece click ' + piece.id);
+    debugger;
+
+    if (this.state.turn === piece.player) {
+
+
+      // if this piece is already selected then deselect.
+      if (this.state.selected) {
+        if (this.state.selected.id === piece.id) {
+          // TODO: If the piece hasn't already been played you should be able to deselect it and readd to list.
+
+
+        }
+
+        // you just clicked a different piece when one was selected. do not do anything for this piece. let the space handle it.
+        return;
+      }
+
+
+      // if piece has a space its already been played.
       let newBoard = this.state.board.slice();
-      newBoard[space].push(this.state.turn);
-      const nextTurn = this.state.turn === 'x' ? 'o' : 'x';
 
-      const winner = this.checkForWin(newBoard);
+      if (piece.space) {
+        // go to board and pop it off this space...
+        newBoard[piece.space].pop();
+      }
+
+      // remove from list of unplayed pieces
+      let newXPieces = this.state.xPieces.slice();
+      let newOPieces = this.state.oPieces.slice();
+      if (piece.player === 'x') {
+        const pieceID = newXPieces.findIndex(p => p.id === piece.id);
+        console.log(pieceID);
+        if (pieceID >= 0) {
+          newXPieces.splice(pieceID, 1);
+        }
+      }
+      else {
+        const pieceID = newOPieces.findIndex(p => p.id === piece.id);
+        if (pieceID >= 0) {
+          newOPieces.splice(pieceID, 1);
+        }
+      }
+
+
 
       this.setState({
-        turn: nextTurn,
+        selected: piece,
         board: newBoard,
-        winner
+        xPieces: newXPieces,
+        oPieces: newOPieces
       });
-
 
     }
   }
 
-  handleSelectPiece(id) {
-    
-  }
-
   handleReset() {
     this.setState({
+      xPieces: [
+        { id: 'x1.1', player: 'x', size: 1 },
+        { id: 'x1.2', player: 'x', size: 1 },
+        { id: 'x2.1', player: 'x', size: 2 },
+        { id: 'x2.2', player: 'x', size: 2 },
+        { id: 'x3.1', player: 'x', size: 3 },
+        { id: 'x3.2', player: 'x', size: 3 },
+      ],
+      oPieces: [
+        { id: 'o1.1', player: 'o', size: 1 },
+        { id: 'o1.2', player: 'o', size: 1 },
+        { id: 'o2.1', player: 'o', size: 2 },
+        { id: 'o2.2', player: 'o', size: 2 },
+        { id: 'o3.1', player: 'o', size: 3 },
+        { id: 'o3.2', player: 'o', size: 3 },
+      ],
       board: [[], [], [], [], [], [], [], [], []],
       turn: 'x',
+      selected: null,
       winner: undefined
     });
 
@@ -91,18 +183,18 @@ export default class TicTacToe extends React.Component {
 
     for (let combo of winningCombos) {
 
-      if (currentBoard[combo[0]] === 'x' &&
-        currentBoard[combo[1]] === 'x' &&
-        currentBoard[combo[2]] === 'x') {
+      if (currentBoard[combo[0]] && currentBoard[combo[0]].player === 'x' &&
+        currentBoard[combo[1]] && currentBoard[combo[1]].player === 'x' &&
+        currentBoard[combo[2]] && currentBoard[combo[2]].player === 'x') {
         return {
           player: 'x',
           combo
         };
       }
 
-      if (currentBoard[combo[0]] === 'o' &&
-        currentBoard[combo[1]] === 'o' &&
-        currentBoard[combo[2]] === 'o') {
+      if (currentBoard[combo[0]] && currentBoard[combo[0]].player === 'o' &&
+        currentBoard[combo[1]] && currentBoard[combo[1]].player === 'o' &&
+        currentBoard[combo[2]] && currentBoard[combo[2]].player === 'o') {
         return {
           player: 'o',
           combo
@@ -115,7 +207,7 @@ export default class TicTacToe extends React.Component {
 
   render() {
 
-    const { xPieces, winner } = this.state;
+    const { turn, xPieces, oPieces, winner } = this.state;
 
     let winningCombo = [];
     if (winner) {
@@ -124,66 +216,148 @@ export default class TicTacToe extends React.Component {
 
 
     const xPiecesComponents = xPieces.map(piece => {
-      return (<a key={piece.id} href="#" onClick={()=>this.handleSelectPiece(piece.id)}>{piece.id}</a>);
+      const selected = this.state.selected && this.state.selected.id === piece.id;
+      return (
+        <Piece key={piece.id} value={piece} selected={selected} onClick={this.handlePieceClick}>
+          {piece.id}
+        </Piece>
+      );
     });
 
-    debugger;
+    const oPiecesComponents = oPieces.map(piece => {
+      const selected = this.state.selected && this.state.selected.id === piece.id;
+      return (
+        <Piece key={piece.id} value={piece} selected={selected} onClick={this.handlePieceClick}>
+          {piece.id}
+        </Piece>
+      );
+    });
 
+
+    const xTurn = turn === 'x' ? 'turn' : '';
+    const oTurn = turn === 'o' ? 'turn' : '';
 
     return (
       <div>
 
-        X Pieces:
-        <div className="pieces">
-          {xPiecesComponents}
+        <div className={`player ${xTurn}`}>
+
+
+          <div className="selection">
+            {
+              (this.state.selected && this.state.selected.player === 'x') &&
+              <Piece value={this.state.selected} onClick={this.handlePieceClick} />
+            }
+          </div>
+
+          <div className="pieces">
+            {xPiecesComponents}
+          </div>
+
         </div>
 
 
         <div className="board">
           <div className="roe">
             <div className="column">
-              <Space id="0" winner={winningCombo.includes(0)} value={this.state.board[0]} onClick={this.handleClick} />
+              <Space id="0"
+                winner={winningCombo.includes(0)}
+                value={this.state.board[0]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
             <div className="column">
-              <Space id="1" winner={winningCombo.includes(1)} value={this.state.board[1]} onClick={this.handleClick} />
+              <Space id="1"
+                winner={winningCombo.includes(1)}
+                value={this.state.board[1]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
             <div className="column">
-              <Space id="2" winner={winningCombo.includes(2)} value={this.state.board[2]} onClick={this.handleClick} />
+              <Space id="2"
+                winner={winningCombo.includes(2)}
+                value={this.state.board[2]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
           </div>
           <div className="roe">
             <div className="column">
-              <Space id="3" winner={winningCombo.includes(3)} value={this.state.board[3]} onClick={this.handleClick} />
+              <Space id="3"
+                winner={winningCombo.includes(3)}
+                value={this.state.board[3]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
             <div className="column">
-              <Space id="4" winner={winningCombo.includes(4)} value={this.state.board[4]} onClick={this.handleClick} />
+              <Space id="4"
+                winner={winningCombo.includes(4)}
+                value={this.state.board[4]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
             <div className="column">
-              <Space id="5" winner={winningCombo.includes(5)} value={this.state.board[5]} onClick={this.handleClick} />
+              <Space id="5"
+                winner={winningCombo.includes(5)}
+                value={this.state.board[5]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
           </div>
           <div className="roe">
             <div className="column">
-              <Space id="6" winner={winningCombo.includes(6)} value={this.state.board[6]} onClick={this.handleClick} />
+              <Space id="6"
+                winner={winningCombo.includes(6)}
+                value={this.state.board[6]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
             <div className="column">
-              <Space id="7" winner={winningCombo.includes(7)} value={this.state.board[7]} onClick={this.handleClick} />
+              <Space id="7"
+                winner={winningCombo.includes(7)}
+                value={this.state.board[7]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
             <div className="column">
-              <Space id="8" winner={winningCombo.includes(8)} value={this.state.board[8]} onClick={this.handleClick} />
+              <Space id="8"
+                winner={winningCombo.includes(8)}
+                value={this.state.board[8]}
+                onSpaceClick={this.handleSpaceClick}
+                onPieceClick={this.handlePieceClick} />
             </div>
           </div>
         </div>
+
+
+        <div className={`player ${oTurn}`}>
+
+          <div className="pieces">
+            {oPiecesComponents}
+          </div>
+
+          <div className="selection">
+            {
+              (this.state.selected && this.state.selected.player === 'o') &&
+              <Piece value={this.state.selected} onClick={this.handlePieceClick} />
+            }
+          </div>
+
+
+        </div>
+
+
         <br />
         <button className="btn btn-secondary btn-lg btn-block" onClick={this.handleReset}>Reset</button>
 
 
 
 
-        {!this.state.winner &&
+        {false && !this.state.winner &&
           <div className="info">
             <br />
-            Up next: {this.state.turn}
+            <div>Up next: {this.state.turn}</div>
+            <div>Selected: {this.state.selected && <Piece value={this.state.selected} />}</div>
           </div>
         }
 
