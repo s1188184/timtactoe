@@ -1,4 +1,8 @@
 
+.board {
+  margin: 10px;
+}
+
 .roe {
   display: flex;
 }
@@ -6,7 +10,7 @@
 .column {
   flex: 1;
   border: 1px solid black;
-  height: 120px;
+  height: 100px;
 }
 
 .space {
@@ -29,4 +33,69 @@
 
 .winner {
   background: yellow;
+}
+
+
+.player {
+  display: flex;
+  align-items: center;
+}
+
+.turn {
+  background: #ddd;
+}
+
+.pieces {
+  flex-basis: 70%;
+  /* border: 1px solid black; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selection {
+  height: 100px;
+  flex-basis: 30%;
+  /* border: 1px solid black; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+.piece{
+  display: inline-block;
+  margin: 5px;
+  padding: 5px;
+  color: white;
+}
+
+.piece.x {
+  background: orange;
+}
+
+.piece.x.selected {
+  border: 5px solid rgb(0, 119, 255);
+}
+
+.piece.o {
+  background: rgb(0, 119, 255);
+}
+
+.piece.o.selected {
+  border: 5px solid orange;
+}
+
+.piece.size1 {
+  width: 20px;
+  height: 20px;
+}
+.piece.size2 {
+  width: 40px;
+  height: 40px;
+}
+.piece.size3 {
+  width: 60px;
+  height: 60px;
 }
