@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 
 import Space from './Space';
 
@@ -11,7 +10,7 @@ export default class TicTacToe extends React.Component {
   constructor() {
     super();
     this.state = {
-      board: ['', '', '', '', '', '', '', '', ''],
+      board: [[], [], [], [], [], [], [], [], []],
       turn: 'x',
     }
     this.handleClick = this.handleClick.bind(this);
@@ -21,10 +20,10 @@ export default class TicTacToe extends React.Component {
 
   handleClick(space) {
 
-    if (!this.state.winner && !this.state.board[space]) {
+    if (!this.state.winner && this.state.board[space].length < 3) {
 
       let newBoard = this.state.board.slice();
-      newBoard[space] = this.state.turn;
+      newBoard[space].push(this.state.turn);
       const nextTurn = this.state.turn === 'x' ? 'o' : 'x';
 
       const winner = this.checkForWin(newBoard);
@@ -41,7 +40,7 @@ export default class TicTacToe extends React.Component {
 
   handleReset() {
     this.setState({
-      board: [],
+      board: [[], [], [], [], [], [], [], [], []],
       turn: 'x',
       winner: undefined
     });
@@ -62,20 +61,27 @@ export default class TicTacToe extends React.Component {
       [2, 4, 6]
     ];
 
+
+    // get current board
+    const currentBoard = board.map(space => {
+      return space[space.length-1];
+    });
+
+
     for (let combo of winningCombos) {
 
-      if (board[combo[0]] === 'x' &&
-        board[combo[1]] === 'x' &&
-        board[combo[2]] === 'x') {
+      if (currentBoard[combo[0]] === 'x' &&
+        currentBoard[combo[1]] === 'x' &&
+        currentBoard[combo[2]] === 'x') {
         return {
           player: 'x',
           combo
         };
       }
 
-      if (board[combo[0]] === 'o' &&
-        board[combo[1]] === 'o' &&
-        board[combo[2]] === 'o') {
+      if (currentBoard[combo[0]] === 'o' &&
+        currentBoard[combo[1]] === 'o' &&
+        currentBoard[combo[2]] === 'o') {
         return {
           player: 'o',
           combo
@@ -134,7 +140,7 @@ export default class TicTacToe extends React.Component {
             </div>
           </div>
         </div>
-        <br/>
+        <br />
         <button className="btn btn-secondary btn-lg btn-block" onClick={this.handleReset}>Reset</button>
 
 

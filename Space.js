@@ -16,15 +16,17 @@ export default class TicTacToe extends React.Component {
   }
 
   render() {
-    const { id, winner } = this.props;
+    const { id, value, winner } = this.props;
 
     const winnerClass = winner ? ' winner' : '';
 
     return (
       <div className={"space" + winnerClass} onClick={this.handleClick}>
         <div className="value">
-          {this.props.value}
-          {/* {id[0]}, {id[1]} */}
+          {value[value.length - 1]}
+          <div className="moves">
+            {value}
+          </div>
         </div>
       </div>
     );
