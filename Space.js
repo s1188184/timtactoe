@@ -18,6 +18,7 @@ export default class Space extends React.Component {
 
   handlePieceClick(piece) {
     console.log('piece click');
+    debugger;
     this.props.onPieceClick(piece)
   }
 
@@ -28,7 +29,7 @@ export default class Space extends React.Component {
 
     const piece = value && value.length > 0 ? <Piece value={value[value.length - 1]} onClick={this.handlePieceClick} /> : undefined;
 
-    const values = value.map(v => v.id);
+    const values = value && value.length > 0 ? value.map(v => v.id) : undefined;
 
     return (
       <div className={"space" + winnerClass} onClick={this.handleSpaceClick}>

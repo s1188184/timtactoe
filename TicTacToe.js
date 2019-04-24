@@ -1,10 +1,13 @@
 import React from "react";
+import firebase from './firebase';
 
 import Space from './Space';
 import Piece from './Piece';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import './tictactoe.css';
+
+
 
 export default class TicTacToe extends React.Component {
 
@@ -27,7 +30,17 @@ export default class TicTacToe extends React.Component {
         { id: 'o3.1', player: 'o', size: 3 },
         { id: 'o3.2', player: 'o', size: 3 },
       ],
-      board: [[], [], [], [], [], [], [], [], []],
+      board: {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+        4: [],
+        5: [],
+        6: [],
+        7: [],
+        8: []
+      },
       turn: 'x',
       selected: null,
     }
@@ -36,6 +49,82 @@ export default class TicTacToe extends React.Component {
     this.handleReset = this.handleReset.bind(this);
   }
 
+  componentDidMount() {
+    const stateRef = firebase.database().ref('state');
+
+    stateRef.child('turn').on('value', (snapshot) => {
+      let turn = snapshot.val();
+      if (!turn) {
+        turn = 'x';
+      }
+      this.setState({ turn });
+    });
+
+    stateRef.child('xPieces').on('value', (snapshot) => {
+      let xPieces = snapshot.val();
+      if (!xPieces) {
+        xPieces = [
+          { id: 'x1.1', player: 'x', size: 1 },
+          { id: 'x1.2', player: 'x', size: 1 },
+          { id: 'x2.1', player: 'x', size: 2 },
+          { id: 'x2.2', player: 'x', size: 2 },
+          { id: 'x3.1', player: 'x', size: 3 },
+          { id: 'x3.2', player: 'x', size: 3 },
+        ];
+      }
+      this.setState({ xPieces });
+    });
+
+    stateRef.child('oPieces').on('value', (snapshot) => {
+      let oPieces = snapshot.val();
+      if (!oPieces) {
+        oPieces = [
+          { id: 'o1.1', player: 'o', size: 1 },
+          { id: 'o1.2', player: 'o', size: 1 },
+          { id: 'o2.1', player: 'o', size: 2 },
+          { id: 'o2.2', player: 'o', size: 2 },
+          { id: 'o3.1', player: 'o', size: 3 },
+          { id: 'o3.2', player: 'o', size: 3 },
+        ];
+      }
+      this.setState({ oPieces });
+    });
+
+    stateRef.child('board').on('value', (snapshot) => {
+      let board = snapshot.val();
+      if (!board) {
+        board = {
+          0: [],
+          1: [],
+          2: [],
+          3: [],
+          4: [],
+          5: [],
+          6: [],
+          7: [],
+          8: []
+        }
+      }
+      this.setState({ board });
+    });
+
+    stateRef.child('selected').on('value', (snapshot) => {
+      let selected = snapshot.val();
+      if (!selected) {
+        selected = null;
+      }
+      this.setState({ selected });
+    });
+
+    stateRef.child('winner').on('value', (snapshot) => {
+      let winner = snapshot.val();
+      if (!winner) {
+        winner = null;
+      }
+      this.setState({ winner });
+    });
+
+  }
 
   handleSpaceClick(space) {
     console.log('space click: ' + space);
@@ -45,28 +134,50 @@ export default class TicTacToe extends React.Component {
 
 
 
-      if (!this.state.winner && this.state.board[space].length < 3) {
+      if (!this.state.winner && (!this.state.board[space] || this.state.board[space].length < 3)) {
+
+        let topPiece = null;
+
+        if (this.state.board[space]) {
+          topPiece = this.state.board[space][this.state.board[space].length - 1];
+        }
 
 
-        const topPiece = this.state.board[space][this.state.board[space].length - 1];
         if (!topPiece || topPiece.size < this.state.selected.size) {
 
           if (this.state.selected.space !== space) {
 
-            let newBoard = this.state.board.slice();
+            let newBoard = Object.assign({}, this.state.board);
             let selectedPiece = Object.assign({}, this.state.selected);
             selectedPiece.space = space;
+            if (!newBoard[space]) {
+              newBoard[space] = [];
+            }
             newBoard[space].push(selectedPiece);
             const nextTurn = this.state.turn === 'x' ? 'o' : 'x';
 
             const winner = this.checkForWin(newBoard);
 
-            this.setState({
-              turn: nextTurn,
-              board: newBoard,
-              selected: null,
-              winner
-            });
+            // this.setState({
+            //   turn: nextTurn,
+            //   board: newBoard,
+            //   selected: null,
+            //   winner
+            // });
+
+            debugger;
+            const stateRef = firebase.database().ref('state');
+            // stateRef.set({
+            //   turn: nextTurn,
+            //   board: newBoard,
+            //   selected: null,
+            //   winner: winner
+            // });
+            stateRef.child('turn').set(nextTurn);
+            stateRef.child('board').set(newBoard);
+            stateRef.child('selected').set(null);
+            stateRef.child('winner').set(winner);
+
 
           }
 
@@ -98,7 +209,7 @@ export default class TicTacToe extends React.Component {
 
 
       // if piece has a space its already been played.
-      let newBoard = this.state.board.slice();
+      let newBoard = Object.assign({}, this.state.board);
 
       if (piece.space) {
         // go to board and pop it off this space...
@@ -124,39 +235,104 @@ export default class TicTacToe extends React.Component {
 
 
 
-      this.setState({
-        selected: piece,
-        board: newBoard,
-        xPieces: newXPieces,
-        oPieces: newOPieces
-      });
+      // this.setState({
+      //   selected: piece,
+      //   board: newBoard,
+      //   xPieces: newXPieces,
+      //   oPieces: newOPieces
+      // });
+
+      const stateRef = firebase.database().ref('state');
+      // stateRef.set({
+      //   selected: piece,
+      //   board: newBoard,
+      //   xPieces: newXPieces,
+      //   oPieces: newOPieces
+      // });
+      stateRef.child('selected').set(piece);
+      stateRef.child('board').set(newBoard);
+      stateRef.child('xPieces').set(newXPieces);
+      stateRef.child('oPieces').set(newOPieces);
 
     }
   }
 
   handleReset() {
-    this.setState({
-      xPieces: [
-        { id: 'x1.1', player: 'x', size: 1 },
-        { id: 'x1.2', player: 'x', size: 1 },
-        { id: 'x2.1', player: 'x', size: 2 },
-        { id: 'x2.2', player: 'x', size: 2 },
-        { id: 'x3.1', player: 'x', size: 3 },
-        { id: 'x3.2', player: 'x', size: 3 },
-      ],
-      oPieces: [
-        { id: 'o1.1', player: 'o', size: 1 },
-        { id: 'o1.2', player: 'o', size: 1 },
-        { id: 'o2.1', player: 'o', size: 2 },
-        { id: 'o2.2', player: 'o', size: 2 },
-        { id: 'o3.1', player: 'o', size: 3 },
-        { id: 'o3.2', player: 'o', size: 3 },
-      ],
-      board: [[], [], [], [], [], [], [], [], []],
-      turn: 'x',
-      selected: null,
-      winner: undefined
+    // this.setState({
+    //   xPieces: [
+    //     { id: 'x1.1', player: 'x', size: 1 },
+    //     { id: 'x1.2', player: 'x', size: 1 },
+    //     { id: 'x2.1', player: 'x', size: 2 },
+    //     { id: 'x2.2', player: 'x', size: 2 },
+    //     { id: 'x3.1', player: 'x', size: 3 },
+    //     { id: 'x3.2', player: 'x', size: 3 },
+    //   ],
+    //   oPieces: [
+    //     { id: 'o1.1', player: 'o', size: 1 },
+    //     { id: 'o1.2', player: 'o', size: 1 },
+    //     { id: 'o2.1', player: 'o', size: 2 },
+    //     { id: 'o2.2', player: 'o', size: 2 },
+    //     { id: 'o3.1', player: 'o', size: 3 },
+    //     { id: 'o3.2', player: 'o', size: 3 },
+    //   ],
+    //   board: [[], [], [], [], [], [], [], [], []],
+    //   turn: 'x',
+    //   selected: null,
+    //   winner: undefined
+    // });
+    const stateRef = firebase.database().ref('state');
+    // stateRef.set({
+    //   xPieces: [
+    //     { id: 'x1.1', player: 'x', size: 1 },
+    //     { id: 'x1.2', player: 'x', size: 1 },
+    //     { id: 'x2.1', player: 'x', size: 2 },
+    //     { id: 'x2.2', player: 'x', size: 2 },
+    //     { id: 'x3.1', player: 'x', size: 3 },
+    //     { id: 'x3.2', player: 'x', size: 3 },
+    //   ],
+    //   oPieces: [
+    //     { id: 'o1.1', player: 'o', size: 1 },
+    //     { id: 'o1.2', player: 'o', size: 1 },
+    //     { id: 'o2.1', player: 'o', size: 2 },
+    //     { id: 'o2.2', player: 'o', size: 2 },
+    //     { id: 'o3.1', player: 'o', size: 3 },
+    //     { id: 'o3.2', player: 'o', size: 3 },
+    //   ],
+    //   board: [[], [], [], [], [], [], [], [], []],
+    //   turn: 'x',
+    //   selected: null,
+    //   winner: null
+    // });
+    stateRef.child('xPieces').set([
+      { id: 'x1.1', player: 'x', size: 1 },
+      { id: 'x1.2', player: 'x', size: 1 },
+      { id: 'x2.1', player: 'x', size: 2 },
+      { id: 'x2.2', player: 'x', size: 2 },
+      { id: 'x3.1', player: 'x', size: 3 },
+      { id: 'x3.2', player: 'x', size: 3 },
+    ]);
+    stateRef.child('oPieces').set([
+      { id: 'o1.1', player: 'o', size: 1 },
+      { id: 'o1.2', player: 'o', size: 1 },
+      { id: 'o2.1', player: 'o', size: 2 },
+      { id: 'o2.2', player: 'o', size: 2 },
+      { id: 'o3.1', player: 'o', size: 3 },
+      { id: 'o3.2', player: 'o', size: 3 },
+    ]);
+    stateRef.child('board').set({
+      0: [],
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: [],
+      6: [],
+      7: [],
+      8: []
     });
+    stateRef.child('turn').set('x');
+    stateRef.child('selected').set(null);
+    stateRef.child('winner').set(null);
 
   }
 
@@ -176,9 +352,21 @@ export default class TicTacToe extends React.Component {
 
 
     // get current board
-    const currentBoard = board.map(space => {
-      return space[space.length - 1];
-    });
+    // const currentBoard = board.map(space => {
+    //   return space[space.length - 1];
+    // });
+    const currentBoard = [
+      (board[0]) ? board[0][board[0].length - 1] : null,
+      (board[1]) ? board[1][board[1].length - 1] : null,
+      (board[2]) ? board[2][board[2].length - 1] : null,
+      (board[3]) ? board[3][board[3].length - 1] : null,
+      (board[4]) ? board[4][board[4].length - 1] : null,
+      (board[5]) ? board[5][board[5].length - 1] : null,
+      (board[6]) ? board[6][board[6].length - 1] : null,
+      (board[7]) ? board[7][board[7].length - 1] : null,
+      (board[8]) ? board[8][board[8].length - 1] : null
+    ];
+    debugger;
 
 
     for (let combo of winningCombos) {
@@ -202,7 +390,7 @@ export default class TicTacToe extends React.Component {
       }
     }
 
-    return undefined;
+    return null;
   }
 
   render() {
